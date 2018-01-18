@@ -1,6 +1,6 @@
 <?php
 
-queue_js_file('vendor/tiny_mce/tiny_mce');
+echo js_tag('vendor/tinymce/tinymce.min');
 $head = array('bodyclass' => 'simple-pages primary', 
               'title' => html_escape(__('Simple Pages | Add Page')));
 echo head($head);
@@ -10,28 +10,31 @@ echo head($head);
 jQuery(window).load(function() {
     // Initialize and configure TinyMCE.
     tinyMCE.init({
-        // Assign TinyMCE a textarea:
-        mode : 'exact',
+        mode: "none",
+        forced_root_block: "",
         elements: '<?php if ($simple_pages_page->use_tiny_mce) echo 'simple-pages-text'; ?>',
-        // Add plugins:
-        plugins: 'media,paste,inlinepopups',
-        // Configure theme:
-        theme: 'advanced',
-        theme_advanced_toolbar_location: 'top',
-        theme_advanced_toolbar_align: 'left',
-        theme_advanced_buttons3_add : 'pastetext,pasteword,selectall',
-        // Allow object embed. Used by media plugin
-        // See http://www.tinymce.com/forum/viewtopic.php?id=24539
-        media_strict: false,
-        // General configuration:
-        convert_urls: false,
+        theme: "modern",
+        menubar:false,
+        height:400,
+        plugins: [
+            "advlist autolink link image lists charmap print preview hr anchor pagebreak",
+            "searchreplace wordcount visualblocks visualchars insertdatetime media nonbreaking spellchecker",
+            "table contextmenu directionality emoticons paste textcolor fullscreen code responsivefilemanager"
+        ],
+        relative_urls: false,
+        filemanager_title:"Responsive Filemanager",
+        external_filemanager_path:"/openjerusalem/omeka/application/views/scripts/javascripts/vendor/filemanager/",
+        external_plugins: { "filemanager" : "/openjerusalem/omeka/application/views/scripts/javascripts/vendor/filemanager/plugin.min.js"},
+        toolbar1: "undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
+        toolbar2: "fullscreen | styleselect responsivefilemanager file image link unlink anchor preview code"            
     });
+
     // Add or remove TinyMCE control.
     jQuery('#simple-pages-use-tiny-mce').click(function() {
         if (jQuery(this).is(':checked')) {
-            tinyMCE.execCommand('mceAddControl', true, 'simple-pages-text');
+            tinyMCE.execCommand('mceAddEditor', false, 'simple-pages-text');
         } else {
-            tinyMCE.execCommand('mceRemoveControl', true, 'simple-pages-text');
+            tinyMCE.execCommand('mceRemoveEditor', false, 'simple-pages-text');
         }
     });
 });
@@ -39,3 +42,5 @@ jQuery(window).load(function() {
 <?php echo flash(); ?>
 <?php echo $form; ?>
 <?php echo foot(); ?>
+
+
