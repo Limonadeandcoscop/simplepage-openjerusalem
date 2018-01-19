@@ -11,6 +11,9 @@ echo head($head);
     <li class="<?php if (isset($_GET['view']) && $_GET['view'] == 'hierarchy') {echo 'current';} ?>">
         <a href="<?php echo html_escape(url('simple-pages/index/browse?view=hierarchy')); ?>"><?php echo __('Hierarchy View'); ?></a>
     </li>
+    <li class="<?php if (isset($_GET['view']) && $_GET['view'] == 'hierarchy') {echo 'current';} ?>">
+        <a href="<?php echo html_escape(url('simple-pages/categories/index')); ?>"><?php echo __('Categories'); ?></a>
+    </li>    
 </ul>
 <?php echo flash(); ?>
 

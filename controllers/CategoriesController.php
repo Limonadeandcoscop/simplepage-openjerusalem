@@ -11,72 +11,68 @@
  *
  * @package SimplePages
  */
-class SimplePages_IndexController extends Omeka_Controller_AbstractActionController
+class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionController
 {    
     public function init()
     {
-        // Set the model class so this controller can perform some functions, 
-        // such as $this->findById()
-        $this->_helper->db->setDefaultModelName('SimplePagesPage');
+        $this->_helper->db->setDefaultModelName('SimplePagesCategory');
     }
     
-    public function indexAction()
+        
+    public function showAction()
     {
-        // Always go to browse.
-        $this->_helper->redirector('browse');
-        return;
+        $this->_helper->viewRenderer->setNoRender();
     }
-    
+
     public function addAction()
     {
         // Create a new page.
-        $page = new SimplePagesPage;
-        
-        // Set the created by user ID.
-        $page->created_by_user_id = current_user()->id;
-        $page->template = '';
-        $page->order = 0;
-        $form = $this->_getForm($page);
+        $category = new SimplePagesCategory;
+        $category->created_by_user_id = current_user()->id;        
+        $category->order = 0;
+        $form = $this->_getForm($category);
         $this->view->form = $form;
-        $this->_processPageForm($page, $form, 'add');
+        $this->_processPageForm($category, $form, 'add');
     }
     
     public function editAction()
     {
         // Get the requested page.
-        $page = $this->_helper->db->findById();
-        $form = $this->_getForm($page);
+        $category = $this->_helper->db->findById();
+        $form = $this->_getForm($category);
         $this->view->form = $form;
-        $this->_processPageForm($page, $form, 'edit');
+        $this->_processPageForm($category, $form, 'edit');        
     }
     
-    protected function _getForm($page = null)
+    protected function _getForm($category = null)
     { 
-        $formOptions = array('type' => 'simple_pages_page', 'hasPublicPage' => true);
-        if ($page && $page->exists()) {
-            $formOptions['record'] = $page;
+        $formOptions = array('type' => 'simple_pages_category', 'hasPublicPage' => true);
+        if ($category && $category->exists()) {
+            $formOptions['record'] = $category;
         }
-        
+      
         $form = new Omeka_Form_Admin($formOptions);
+
         $form->addElementToEditGroup(
             'text', 'title',
             array(
                 'id' => 'simple-pages-title',
-                'value' => $page->title,
+                'value' => $category->title,
                 'label' => __('Title'),
-                'description' => __('Name and heading for the page (required)'),
+                'description' => __('Name and heading for the category (required)'),
                 'required' => true
             )
         );
         
+
         $form->addElementToEditGroup(
             'text', 'slug',
             array(
                 'id' => 'simple-pages-slug',
-                'value' => $page->slug,
+                'value' => $category->slug,
                 'label' => __('Slug'),
                 'description' => __(
-                    'The slug is the part of the URL for this page. A slug '
+                    'The slug is the part of the URL for this category. A slug '
                     . 'will be created automatically from the title if one is '
                     . 'not entered. Letters, numbers, underscores, dashes, and '
                     . 'forward slashes are allowed.'
@@ -84,35 +80,36 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             )
         );
         
-        
+
         $form->addElementToEditGroup(
             'textarea', 'text',
             array('id' => 'simple-pages-text',
                 'cols'  => 50,
-                'rows'  => 25,
-                'value' => $page->text,
+                'rows'  => 10,
+                'value' => $category->text,
                 'label' => __('Text'),
                 'description' => __(
-                    'Add content for page. This field supports shortcodes. For a list of available shortcodes, refer to the <a target=_blank href="http://omeka.org/codex/Shortcodes">Omeka Codex</a>.'
+                    'Add description content for category.'
                 )
             )
         );
         
+        /*
         $form->addElementToSaveGroup(
             'select', 'parent_id',
             array(
                 'id' => 'simple-pages-parent-id',
-                'multiOptions' => simple_pages_get_parent_options($page),
-                'value' => $page->parent_id,
+                'multiOptions' => simple_pages_get_parent_options($category),
+                'value' => $category->parent_id,
                 'label' => __('Parent'),
                 'description' => __('The parent page')
             )
         );
-        
+
         $form->addElementToSaveGroup(
             'text', 'order',
             array(
-                'value' => $page->order,
+                'value' => $category->order,
                 'label' => __('Order'),
                 'description' => __(
                     'The order of the page relative to the other pages with '
@@ -120,17 +117,18 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 )
             )
         );
-        
+     
         $form->addElementToSaveGroup(
             'checkbox', 'is_published',
             array(
                 'id' => 'simple_pages_is_published',
                 'values' => array(1, 0),
-                'checked' => $page->is_published,
+                'checked' => $category->is_published,
                 'label' => __('Publish this page?'),
                 'description' => __('Checking this box will make the page public')
             )
         );
+        */
 
         if (class_exists('Omeka_Form_Element_SessionCsrfToken')) {
             $form->addElement('sessionCsrfToken', 'csrf_token');
@@ -142,10 +140,10 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
     /**
      * Process the page edit and edit forms.
      */
-    private function _processPageForm($page, $form, $action)
+    private function _processPageForm($category, $form, $action)
     {
         // Set the page object to the view.
-        $this->view->simple_pages_page = $page;
+        $this->view->category = $category;
 
         if ($this->getRequest()->isPost()) {
             if (!$form->isValid($_POST)) {
@@ -153,12 +151,12 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 return;
             }
             try {
-                $page->setPostData($_POST);
-                if ($page->save()) {
+                $category->setPostData($_POST);
+                if ($category->save()) {
                     if ('add' == $action) {
-                        $this->_helper->flashMessenger(__('The page "%s" has been added.', $page->title), 'success');
+                        $this->_helper->flashMessenger(__('The category "%s" has been added.', $category->title), 'success');
                     } else if ('edit' == $action) {
-                        $this->_helper->flashMessenger(__('The page "%s" has been edited.', $page->title), 'success');
+                        $this->_helper->flashMessenger(__('The category "%s" has been edited.', $category->title), 'success');
                     }
                     
                     $this->_helper->redirector('browse');
@@ -173,6 +171,24 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
 
     protected function _getDeleteSuccessMessage($record)
     {
-        return __('The page "%s" has been deleted.', $record->title);
+        return __('The category "%s" has been deleted.', $record->title);
+    }
+
+
+    /**
+     * Ask for user confirmation before deleting a record.
+     * 
+     * @uses Omeka_Controller_Action_Helper_Db::findById()
+     * @uses self::_getDeleteConfirmMessage()
+     */
+    public function deleteConfirmAction()
+    {
+        $isPartial = $this->getRequest()->isXmlHttpRequest();
+        $record = $this->_helper->db->findById();
+        $form = $this->_getDeleteForm();
+        $confirmMessage = $this->_getDeleteConfirmMessage($record);
+
+        $this->view->assign(compact('confirmMessage','record', 'isPartial', 'form'));
+        $this->render('common/delete-confirm', null, true);
     }
 }

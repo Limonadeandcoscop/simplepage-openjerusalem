@@ -68,6 +68,24 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         $db->query($sql);
         
+
+        $sql = "
+        CREATE TABLE IF NOT EXISTS `$db->SimplePagesCategory` (
+          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `modified_by_user_id` int(10) unsigned NOT NULL,
+          `created_by_user_id` int(10) unsigned NOT NULL,
+          `is_published` tinyint(1) NOT NULL,          
+          `title` tinytext COLLATE utf8_unicode_ci NOT NULL,
+          `slug` tinytext COLLATE utf8_unicode_ci NOT NULL,
+          `text` mediumtext COLLATE utf8_unicode_ci,
+          `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          `inserted` timestamp NOT NULL DEFAULT '2000-01-01 00:00:00',
+          `order` int(10) unsigned NOT NULL,
+          `parent_id` int(10) unsigned NOT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        $db->query($sql);
+
         // Save an example page.
         $page = new SimplePagesPage;
         $page->modified_by_user_id = current_user()->id;
@@ -91,6 +109,8 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $db = $this->_db;
         $sql = "DROP TABLE IF EXISTS `$db->SimplePagesPage`";
         $db->query($sql);
+        $sql = "DROP TABLE IF EXISTS `$db->SimplePagesCategory`";
+        $db->query($sql);        
 
         $this->_uninstallOptions();
     }
@@ -180,11 +200,14 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         
         $indexResource = new Zend_Acl_Resource('SimplePages_Index');
         $pageResource = new Zend_Acl_Resource('SimplePages_Page');
+        $categoryResource = new Zend_Acl_Resource('SimplePages_Category');
         $acl->add($indexResource);
         $acl->add($pageResource);
+        $acl->add($categoryResource);
 
-        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page'));
+        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category'));
         $acl->allow(null, 'SimplePages_Page', 'show');
+        $acl->allow(null, 'SimplePages_Category', 'show');
         $acl->deny(null, 'SimplePages_Page', 'show-unpublished');
     }
 
@@ -214,6 +237,23 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
                         'controller'   => 'page', 
                         'action'       => 'show', 
                         'id'           => $page->id
+                    )
+                )
+            );
+        }
+
+        // Add custom routes based on the category slug.
+        $categories = get_db()->getTable('SimplePagesCategory')->findAll();
+        foreach ($categories as $category) {
+            $router->addRoute(
+                'simple_pages_show_category_' . $category->id, 
+                new Zend_Controller_Router_Route(
+                    'categories/' . $category->slug, 
+                    array(
+                        'module'       => 'simple-pages', 
+                        'controller'   => 'categories', 
+                        'action'       => 'show', 
+                        'id'           => $category->id
                     )
                 )
             );

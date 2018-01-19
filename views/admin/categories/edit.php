@@ -1,8 +1,7 @@
 <?php
-
 echo js_tag('vendor/tinymce/tinymce.min');
 $head = array('bodyclass' => 'simple-pages primary', 
-              'title' => html_escape(__('Simple Pages | Add Page')));
+              'title' => __('Categories | Edit "%s"', $category->title));
 echo head($head);
 ?>
 
@@ -12,7 +11,6 @@ jQuery(window).load(function() {
     tinyMCE.init({
         mode: "none",
         forced_root_block: "",
-        elements: '<?php if ($simple_pages_page->use_tiny_mce) echo 'simple-pages-text'; ?>',
         theme: "modern",
         menubar:false,
         height:400,
@@ -30,11 +28,9 @@ jQuery(window).load(function() {
     });
 
     tinyMCE.execCommand('mceAddEditor', false, 'simple-pages-text');
-    
 });
 </script>
+
 <?php echo flash(); ?>
 <?php echo $form; ?>
 <?php echo foot(); ?>
-
-
