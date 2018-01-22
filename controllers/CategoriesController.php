@@ -29,7 +29,7 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
         // Create a new page.
         $category = new SimplePagesCategory;
         $category->created_by_user_id = current_user()->id;        
-        $category->order = 0;
+        $category->order = 1;
         $form = $this->_getForm($category);
         $this->view->form = $form;
         $this->_processPageForm($category, $form, 'add');
@@ -80,6 +80,16 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
             )
         );
         
+        $form->addElementToEditGroup(
+            'select', 'parent_id',
+            array(
+                'id' => 'simple-pages-parent-id',
+                'multiOptions' => simple_pages_categories_get_parent_options($category),
+                'value' => $category->parent_id,
+                'label' => __('Parent'),
+                'description' => __('The parent category')
+            )
+        );
 
         $form->addElementToEditGroup(
             'textarea', 'text',
@@ -94,18 +104,8 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
             )
         );
         
-        /*
-        $form->addElementToSaveGroup(
-            'select', 'parent_id',
-            array(
-                'id' => 'simple-pages-parent-id',
-                'multiOptions' => simple_pages_get_parent_options($category),
-                'value' => $category->parent_id,
-                'label' => __('Parent'),
-                'description' => __('The parent page')
-            )
-        );
-
+        
+/*
         $form->addElementToSaveGroup(
             'text', 'order',
             array(
@@ -172,6 +172,16 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
     protected function _getDeleteSuccessMessage($record)
     {
         return __('The category "%s" has been deleted.', $record->title);
+    }
+
+    public function browseAction() 
+    {
+        parent::browseAction();
+
+        $pluralName = $this->view->pluralize($this->_helper->db->getDefaultModelName());
+        $c = new SimplePagesCategory;
+        $this->view->$pluralName = $c->getCategories();
+
     }
 
 

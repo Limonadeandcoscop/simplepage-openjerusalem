@@ -28,6 +28,9 @@ echo head(array('title'=>$pageTitle,'bodyclass' => 'items browse'));
             <td>
                 <span class="title">
                     <a href="<?php echo html_escape(record_url($category)); ?>">
+                        <?php for($i = 1 ; $i < $category->level ; $i++): ?>
+                            ---
+                        <?php endfor; ?>
                         <?php echo $category->title; ?>
                     </a>
                 </span>
@@ -56,6 +59,6 @@ echo head(array('title'=>$pageTitle,'bodyclass' => 'items browse'));
 
 <?php echo pagination_links(); ?>
 
-<?php fire_plugin_hook('public_simple_page_categories_browse', array('items'=>$simple_pages_categories, 'view' => $this)); ?>
+<?php fire_plugin_hook('public_simple_page_categories_browse', array('categories'=>$simple_pages_categories, 'view' => $this)); ?>
 
 <?php echo foot(); ?>

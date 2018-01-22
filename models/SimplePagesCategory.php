@@ -21,9 +21,12 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
     public $text = null;
     public $updated;
     public $inserted;
-    public $order = 0;
+    public $level = 1;
+    public $order = 1;
     public $parent_id = 0;
 
+    private $_categories;
+    private $_hierarchy;
 
     /**
      * Validate the form data.
@@ -83,10 +86,25 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
         
         if ($this->parent_id == '') {
             $this->parent_id = 0;
+        } else {
+            $parentCategory = get_record_by_id('SimplePagesCategory', $this->parent_id);
+            $this->level    = $parentCategory->level + 1;
         }
-        
+
         $this->modified_by_user_id = current_user()->id;
     }   
+
+
+
+    protected function beforeDelete()
+    {
+        $categories = $this->getCategories($this->id);
+        if (count($categories)) {
+            foreach($categories as $category) {
+                $category->delete();
+            }
+        }
+    }
 
 
     /**
@@ -119,6 +137,48 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
     public function getResourceId()
     {
         return 'SimplePages_Category';
+    }
+
+
+     /**
+     * Get comments of the note sorted in a tree
+     *
+     * @param Boolean $category_id If provides returns all child of the category
+     * @return Array of SimplePagesCategory objects
+     */
+    public function getCategories($category_id = false) {
+
+        $params['sort_field']       = 'inserted';
+        $params['sort_dir']         = 'a';
+
+        $table      = get_db()->getTable('SimplePagesCategory');
+        $categories = $table->findBy($params);
+
+        $this->_categories = $categories;
+
+        $this->getChildCategories($category_id);
+
+        return $this->_hierarchy;
+    }
+
+
+    /**
+     * Recursive function witch build the categories tree
+     * Fill the $_hierarchy variable
+     *
+     * @param Boolean $category_id If provides returns all child of the comment
+     * @return void
+     */
+    private function getChildCategories($category_id = false) {
+
+        foreach ($this->_categories as $key => $category) {
+            if ($category->parent_id == $category_id) {
+                $this->_hierarchy[] = $category;
+                unset($this->_categories[$key]);
+                $this->getChildCategories($category->id);
+            }
+    
+        }
     }
 
 }

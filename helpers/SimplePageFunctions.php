@@ -172,3 +172,22 @@ function simple_pages_get_parent_options($page)
     }
     return $valuePairs;
 }
+
+function simple_pages_categories_get_parent_options($category)
+{
+    $valuePairs = array('0' => __('Main Page (No Parent)'));
+    $c = new SimplePagesCategory;
+    $categories = $c->getCategories();
+
+    $results = array();
+    $results[0] =__('Main Category (No Parent)');
+    $t = '';
+    foreach($categories as $category) {
+        for($i = 1 ; $i < $category->level ; $i++) $t .= '---';
+
+        $title = $t.$category->title;
+        $results[$category->id] = $title;
+    }
+    return $results;
+}
+
