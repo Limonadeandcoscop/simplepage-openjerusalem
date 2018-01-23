@@ -21,7 +21,16 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
         
     public function showAction()
     {
-        $this->_helper->viewRenderer->setNoRender();
+        parent::showAction();   
+
+        $route = $this->getFrontController()->getRouter()->getCurrentRouteName();
+        $isHomePage = ($route == Omeka_Application_Resource_Router::HOMEPAGE_ROUTE_NAME);
+
+        $category = $this->view->simple_pages_category;
+        $this->view->parents = $category->getParents($category->id, 1);
+        $this->view->children = $category->getCategories($category->id, 1);
+
+        $this->view->is_home_page = $isHomePage;
     }
 
     public function addAction()

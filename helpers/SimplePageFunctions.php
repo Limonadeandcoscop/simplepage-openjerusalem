@@ -181,8 +181,8 @@ function simple_pages_categories_get_parent_options($category)
 
     $results = array();
     $results[0] =__('Main Category (No Parent)');
-    $t = '';
     foreach($categories as $category) {
+        $t = '';
         for($i = 1 ; $i < $category->level ; $i++) $t .= '---';
 
         $title = $t.$category->title;
@@ -191,3 +191,37 @@ function simple_pages_categories_get_parent_options($category)
     return $results;
 }
 
+
+
+/**
+ * Returns a breadcrumb for a given page.
+ *
+ * @uses public_url(), html_escape()
+ * @param integer|null The id of the page.  If null, it uses the current simple page.
+ * @param string $separator The string used to separate each section of the breadcrumb.
+ * @param boolean $includePage Whether to include the title of the current page.
+ */
+function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $includePage=true)
+{
+    $html = '';
+
+    if ($categoryId === null) {
+        $category = get_current_record('simple_pages_category', false);
+    } else {
+        $category = get_db()->getTable('SimplePagesCategory')->find($categoryId);
+    }
+
+    if ($category) {
+        $ancestorCategories = $category->getParents($category->id);
+        $nb = count($ancestorCategories);
+        $i = 1;
+        foreach ($ancestorCategories as $cat) {
+            $html .= '<a href="'.$cat->getUrl().'">'.$cat->title.'</a>';
+            if ($i<$nb)
+                $html .= $separator;
+            $i++;
+        }
+    }
+
+    return $html;
+}

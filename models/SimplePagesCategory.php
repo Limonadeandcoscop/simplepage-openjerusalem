@@ -27,6 +27,7 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
 
     private $_categories;
     private $_hierarchy;
+    private $_parents;
 
     /**
      * Validate the form data.
@@ -180,5 +181,46 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
     
         }
     }
+
+
+    public function getParents($category_id = false, $exclude_current = false) {
+
+        $this->_parents = array();
+
+        $this->getAncestorsCategories($category_id);
+        if (count($this->_parents)) {
+            $this->_parents = array_reverse($this->_parents);
+        }     
+        
+        if (!$exclude_current)
+            $this->_parents[] = $this;           
+        
+        return $this->_parents;
+    }
+
+
+    /**
+     * Recursive function witch build the categories parents
+     * Fill the $_hierarchy variable
+     *
+     * @param Boolean $category_id If provides returns all child of the comment
+     * @return void
+     */
+    private function getAncestorsCategories($category_id = false, $exclude_current = false) {
+
+        $table = get_db()->getTable('SimplePagesCategory');
+        $row = $table->findBy(array('id' => $category_id));
+        $parent_id = $row[0]->parent_id;
+        if (strlen(trim($parent_id)) && $parent_id != 0) {
+            $this->_parents[] = get_record_by_id('SimplePagesCategory', $parent_id);
+            $this->getAncestorsCategories($parent_id);
+        }
+    }
+
+
+    public function getUrl() {
+        return url('categories/'.$this->slug);
+    }
+
 
 }
