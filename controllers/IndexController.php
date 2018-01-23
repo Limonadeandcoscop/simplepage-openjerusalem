@@ -84,6 +84,16 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             )
         );
         
+        $form->addElementToEditGroup(
+            'select', 'category_id',
+            array(
+                'id' => 'simple-pages-category-id',
+                'multiOptions' => simple_pages_categories_get_parent_options($category),
+                'value' => $page->category_id,
+                'label' => __('Category'),
+                'description' => __('Page category')
+            )
+        );           
         
         $form->addElementToEditGroup(
             'textarea', 'text',
@@ -98,6 +108,7 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             )
         );
         
+        /*
         $form->addElementToSaveGroup(
             'select', 'parent_id',
             array(
@@ -108,6 +119,7 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 'description' => __('The parent page')
             )
         );
+        */
         
         $form->addElementToSaveGroup(
             'text', 'order',
@@ -120,7 +132,8 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 )
             )
         );
-        
+
+       
         $form->addElementToSaveGroup(
             'checkbox', 'is_published',
             array(

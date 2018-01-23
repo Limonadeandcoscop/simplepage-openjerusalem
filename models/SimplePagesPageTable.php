@@ -188,10 +188,19 @@ class SimplePagesPageTable extends Omeka_Db_Table
     {
         $select = parent::getSelect();
         $permissions = new Omeka_Db_Select_PublicPermissions('SimplePages_Page');
-        $permissions->apply($select, 'simple_pages_pages','created_by_user_id','is_published');
+        $permissions->apply($select, 'simple_pages_pages','created_by_user_id','is_published', 'category_id');
         
         
         return $select;
 	
+    }
+
+    public function getPages($category_id) 
+    {
+        $select = $this->getSelect();
+        $alias = $this->getTableAlias();
+        $paramName = 'category_id';
+        $select->where($alias . '.' . $paramName . ' = ?', $category_id);
+        return $this->fetchObjects($select);
     }
 }

@@ -55,6 +55,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
           `inserted` timestamp NOT NULL DEFAULT '2000-01-01 00:00:00',
           `order` int(10) unsigned NOT NULL,
           `parent_id` int(10) unsigned NOT NULL,
+          `category_id` int(10) unsigned NULL,
           `template` tinytext COLLATE utf8_unicode_ci NOT NULL,
           `use_tiny_mce` tinyint(1) NOT NULL,
           PRIMARY KEY (`id`),

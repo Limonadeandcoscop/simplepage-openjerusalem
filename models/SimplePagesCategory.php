@@ -223,4 +223,10 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
     }
 
 
+    public function getPages() {
+
+        return get_db()->getTable('SimplePagesPage')->getPages($this->id);
+    }
+
+
 }

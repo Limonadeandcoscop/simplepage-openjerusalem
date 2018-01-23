@@ -18,23 +18,31 @@ echo head(array(
     <?php endif; ?>
 </div>
 
+<div id="category-pages">
+    <?php if (count($pages)): ?>    
+    <b><?php echo __('Pages of this category') ?></b><br />
+    <?php foreach($pages as $page): ?>
+        <a href="<?php echo $page->getRecordUrl() ?>"><?php echo $page->title ?></a><br />
+    <?php endforeach; ?>    
+<?php endif; ?>    
+</div>    
+
 
 <div id="parents-categories">
 <?php if (count($parents)): ?>    
     <b><?php echo __('Parents categories') ?></b><br />
-    <?php foreach($this->parents as $category): ?>
+    <?php foreach($parents as $category): ?>
         <a href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a><br />
     <?php endforeach; ?>    
 <?php endif; ?>    
 </div>
 
 
-
 <div id="children-categories">
 <?php if (count($children)): ?>    
     <b><?php echo __('Children categories') ?></b><br />
-    <?php foreach($this->children as $category): ?>
-        <a href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a><br />
+    <?php foreach($children as $category): ?>
+        <a  href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a><br />
     <?php endforeach; ?>    
 <?php endif; ?>    
 </div>

@@ -23,6 +23,7 @@ class SimplePagesPage extends Omeka_Record_AbstractRecord implements Zend_Acl_Re
     public $inserted;
     public $order = 0;
     public $parent_id = 0;
+    public $category_id = null;
     public $template = '';
     public $use_tiny_mce = 0;
     
