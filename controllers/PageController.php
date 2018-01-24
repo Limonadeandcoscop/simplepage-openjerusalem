@@ -28,6 +28,9 @@ class SimplePages_PageController extends Omeka_Controller_AbstractActionControll
         $route = $this->getFrontController()->getRouter()->getCurrentRouteName();
         $isHomePage = ($route == Omeka_Application_Resource_Router::HOMEPAGE_ROUTE_NAME);
 
+        $categoryObject = new SimplePagesCategory();
+        $this->view->tree = $categoryObject->getTree($page->category_id);
+
         // Set the page object to the view.
         $this->view->simple_pages_page = $page;
         $this->view->is_home_page = $isHomePage;

@@ -141,6 +141,7 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
     }
 
 
+
      /**
      * Get comments of the note sorted in a tree
      *
@@ -149,13 +150,19 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
      */
     public function getCategories($category_id = false) {
 
+        $this->_hierarchy = array();
+
         $params['sort_field']       = 'inserted';
         $params['sort_dir']         = 'a';
-
         $table      = get_db()->getTable('SimplePagesCategory');
         $categories = $table->findBy($params);
 
         $this->_categories = $categories;
+
+        if ($category_id) {
+            $c = get_record_by_id("SimplePagesCategory", $category_id);
+            $this->_hierarchy[] = $c;
+        }
 
         $this->getChildCategories($category_id);
 
@@ -196,6 +203,26 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
             $this->_parents[] = $this;           
         
         return $this->_parents;
+    }
+
+
+    public function getTree($category_id) {
+
+        $topParent = $this->getTopParentCategory($category_id);
+        $tree = $this->getCategories($topParent->id);
+        foreach($tree as $t) {
+            $t->pages = $t->getPages();
+            if ($t->id == $category_id)
+                $t->current = true;
+        }
+        return $tree;
+    }
+
+
+    public function getTopParentCategory($category_id) {
+
+        $parents = $this->getParents($category_id);
+        return $parents[0];
     }
 
 

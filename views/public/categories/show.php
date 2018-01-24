@@ -28,23 +28,19 @@ echo head(array(
 </div>    
 
 
-<div id="parents-categories">
-<?php if (count($parents)): ?>    
-    <b><?php echo __('Parents categories') ?></b><br />
-    <?php foreach($parents as $category): ?>
-        <a href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a><br />
+<div id="categories-tree" style="margin-top:50px;">
+<?php if (count($tree)): ?>    
+    <b><?php echo __('Tree') ?></b><br />
+    <?php foreach($tree as $category): ?>
+        <a style="margin-left:<?php echo ((integer)$category->level * 20)-20 ?>px"  href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a> 
+        (<?php echo count($category->pages) ?>)
+        <?php if ($category->current): ?>
+            ***
+        <?php endif; ?>    
+        <br />
     <?php endforeach; ?>    
 <?php endif; ?>    
 </div>
 
-
-<div id="children-categories">
-<?php if (count($children)): ?>    
-    <b><?php echo __('Children categories') ?></b><br />
-    <?php foreach($children as $category): ?>
-        <a  href="<?php echo $category->getUrl() ?>"><?php echo $category->title ?></a><br />
-    <?php endforeach; ?>    
-<?php endif; ?>    
-</div>
 
 <?php echo foot(); ?>

@@ -27,8 +27,9 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
         $isHomePage = ($route == Omeka_Application_Resource_Router::HOMEPAGE_ROUTE_NAME);
 
         $category = $this->view->simple_pages_category;
-        $this->view->parents = $category->getParents($category->id, 1);
-        $this->view->children = $category->getCategories($category->id, 1);
+        //$this->view->parents    = $category->getParents($category->id, 1);
+        //$this->view->children   = $category->getCategories($category->id, 1);
+        $this->view->tree       = $category->getTree($category->id);
 
         $this->view->pages = $category->getPages();
 
