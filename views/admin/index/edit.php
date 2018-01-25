@@ -39,3 +39,12 @@ jQuery(window).load(function() {
     html_escape(format_date(metadata('simple_pages_page', 'updated'), Zend_Date::DATETIME_SHORT))); ?></p>
 <?php echo $form; ?>
 <?php echo foot(); ?>
+
+
+<script src="https://semantic-ui.com/dist/semantic.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://semantic-ui.com/dist/semantic.min.css">
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.ui.fluid.dropdown').dropdown({'allowAdditions': true, 'saveRemoteData': false});
+});
+</script>    

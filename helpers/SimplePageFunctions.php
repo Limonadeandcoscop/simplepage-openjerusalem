@@ -203,7 +203,7 @@ function simple_pages_categories_get_parent_options($category)
  */
 function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $withItems = false)
 {
-    $html = link_to_home_page(__('Home')) . $separator;
+    $html = link_to_home_page(__('Home'));
 
     if ($categoryId === null) {
         $category = get_current_record('simple_pages_category', false);
@@ -212,6 +212,7 @@ function simple_pages_categories_display_breadcrumbs($categoryId = null, $separa
     }
 
     if ($category) {
+        $html .= $seperator;
         $ancestorCategories = $category->getParents($category->id);
         $nb = count($ancestorCategories);
         $i = 1;

@@ -37,4 +37,10 @@ jQuery(window).load(function() {
 <?php echo $form; ?>
 <?php echo foot(); ?>
 
-
+<script src="https://semantic-ui.com/dist/semantic.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://semantic-ui.com/dist/semantic.min.css">
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.ui.fluid.dropdown').dropdown({'allowAdditions': true, 'saveRemoteData': false});
+});
+</script>    

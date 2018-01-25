@@ -237,10 +237,12 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
 
         $table = get_db()->getTable('SimplePagesCategory');
         $row = $table->findBy(array('id' => $category_id));
-        $parent_id = $row[0]->parent_id;
-        if (strlen(trim($parent_id)) && $parent_id != 0) {
-            $this->_parents[] = get_record_by_id('SimplePagesCategory', $parent_id);
-            $this->getAncestorsCategories($parent_id);
+        if (isset($row[0])) {
+            $parent_id = $row[0]->parent_id;
+            if (strlen(trim($parent_id)) && $parent_id != 0) {
+                $this->_parents[] = get_record_by_id('SimplePagesCategory', $parent_id);
+                $this->getAncestorsCategories($parent_id);
+            }
         }
     }
 

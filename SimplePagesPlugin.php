@@ -88,6 +88,27 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         $db->query($sql);
 
+
+        $sql = "
+        CREATE TABLE IF NOT EXISTS `$db->SimplePagesKeyword` (
+          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `name` tinytext COLLATE utf8_unicode_ci NOT NULL,
+          `inserted` timestamp NOT NULL DEFAULT  CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        $db->query($sql);        
+
+
+        $sql = "
+        CREATE TABLE IF NOT EXISTS `$db->SimplePagesPageKeyword` (
+          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+          `page_id`  int(10) unsigned NOT NULL,
+          `keyword_id`  int(10) unsigned NOT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        $db->query($sql);        
+
+
         // Save an example page.
         $page = new SimplePagesPage;
         $page->modified_by_user_id = current_user()->id;
@@ -113,7 +134,11 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $db->query($sql);
         $sql = "DROP TABLE IF EXISTS `$db->SimplePagesCategory`";
         $db->query($sql);        
-
+        $sql = "DROP TABLE IF EXISTS `$db->SimplePagesKeyword`";
+        $db->query($sql);                
+        $sql = "DROP TABLE IF EXISTS `$db->SimplePagesPageKeyword`";
+        $db->query($sql);          
+        
         $this->_uninstallOptions();
     }
 
@@ -260,6 +285,23 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
                 )
             );
         }
+
+        // Add custom routes based on the tag name.
+        $keywords = get_db()->getTable('SimplePagesKeyword')->findAll();
+        foreach ($keywords as $keyword) {
+            $router->addRoute(
+                'simple_pages_show_keyword_' . $keyword->id, 
+                new Zend_Controller_Router_Route(
+                    'tags/' . $keyword->name, 
+                    array(
+                        'module'       => 'simple-pages', 
+                        'controller'   => 'page', 
+                        'action'       => 'show-keyword', 
+                        'id'           => $keyword->id
+                    )
+                )
+            );
+        }        
     }
 
     /**

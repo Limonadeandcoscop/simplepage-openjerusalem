@@ -41,4 +41,13 @@ echo head(array(
 </div>
 
 
+<div id="tags" style="margin-top:50px;">
+<?php if (count($tags)): ?>    
+    <b><?php echo __('Tags') ?></b><br />
+    <?php foreach($tags as $tag): ?>
+        <a href="<?php echo $tag->getUrl() ?>"><?php echo $tag->name ?></a><br />
+    <?php endforeach; ?>    
+<?php endif; ?>    
+</div>
+
 <?php echo foot(); ?>

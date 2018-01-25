@@ -31,8 +31,20 @@ class SimplePages_PageController extends Omeka_Controller_AbstractActionControll
         $categoryObject = new SimplePagesCategory();
         $this->view->tree = $categoryObject->getTree($page->category_id);
 
+        $this->view->tags = $page->getKeywordsObjects();
+
         // Set the page object to the view.
         $this->view->simple_pages_page = $page;
         $this->view->is_home_page = $isHomePage;
     }
+
+
+
+    public function showKeywordAction()
+    {
+        $keyword = get_record_by_id('SimplePagesKeyword', $this->_getParam('id'));
+        $this->view->keyword    = $keyword;
+        $this->view->pages      = $keyword->getPages();
+    }
+
 }

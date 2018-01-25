@@ -88,12 +88,40 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             'select', 'category_id',
             array(
                 'id' => 'simple-pages-category-id',
-                'multiOptions' => simple_pages_categories_get_parent_options($category),
+                'multiOptions' => simple_pages_categories_get_parent_options($page),
                 'value' => $page->category_id,
                 'label' => __('Category'),
                 'description' => __('Page category')
             )
-        );           
+        );   
+
+
+        $keywords = get_db()->getTable('SimplePagesKeyword')->findAll();
+        $keywordsList = array();
+        if (count($keywords)) {
+            foreach ($keywords as $keyword)  {
+                $keywordsList[strtolower($keyword->name)] = $keyword->name;
+            }
+        }
+
+        $pageKeywords = $page->getKeywords();
+        $keywordsPageList = array();
+        if (count($pageKeywords)) {
+            foreach ($pageKeywords as $keyword) {
+                $keywordObj = get_record_by_id('SimplePagesKeyword', $keyword->keyword_id);
+                $keywordsPageList[] = strtolower($keywordObj->name);
+            }
+        }
+                
+        $form->addElementToEditGroup('select', 'keywords', array(
+            'label' => __('Keywords'),
+            'class' => 'ui fluid search dropdown',
+            'multiple' => 'multiple',
+            'registerInArrayValidator' => false,
+            'multiOptions' => $keywordsList,
+            'value' => $keywordsPageList
+        ));       
+
         
         $form->addElementToEditGroup(
             'textarea', 'text',
@@ -108,19 +136,7 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             )
         );
         
-        /*
-        $form->addElementToSaveGroup(
-            'select', 'parent_id',
-            array(
-                'id' => 'simple-pages-parent-id',
-                'multiOptions' => simple_pages_get_parent_options($page),
-                'value' => $page->parent_id,
-                'label' => __('Parent'),
-                'description' => __('The parent page')
-            )
-        );
-        */
-        
+
         $form->addElementToSaveGroup(
             'text', 'order',
             array(
@@ -188,4 +204,5 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
     {
         return __('The page "%s" has been deleted.', $record->title);
     }
+
 }
