@@ -14,7 +14,7 @@ echo head(array(
 
     <?php if (!$is_home_page): ?>
     <p id="simple-pages-breadcrumbs">
-        <?php echo simple_pages_categories_display_breadcrumbs($simple_pages_page->category_id) ?> > <?php echo metadata('simple_pages_page', 'title'); ?>
+        <?php echo simple_pages_categories_display_breadcrumbs($simple_pages_page->category_id, " > ", 'with_items') ?> > <?php echo metadata('simple_pages_page', 'title'); ?>
     </p>
     <?php endif; ?>
 

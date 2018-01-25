@@ -199,11 +199,11 @@ function simple_pages_categories_get_parent_options($category)
  * @uses public_url(), html_escape()
  * @param integer|null The id of the page.  If null, it uses the current simple page.
  * @param string $separator The string used to separate each section of the breadcrumb.
- * @param boolean $includePage Whether to include the title of the current page.
+ * @param boolean $withItems Specify if the breadcrumb contains item
  */
-function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $includePage=true)
+function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $withItems = false)
 {
-    $html = '';
+    $html = link_to_home_page(__('Home')) . $separator;
 
     if ($categoryId === null) {
         $category = get_current_record('simple_pages_category', false);
@@ -216,7 +216,11 @@ function simple_pages_categories_display_breadcrumbs($categoryId = null, $separa
         $nb = count($ancestorCategories);
         $i = 1;
         foreach ($ancestorCategories as $cat) {
-            $html .= '<a href="'.$cat->getUrl().'">'.$cat->title.'</a>';
+            if($i == $nb && !$withItems)
+                $html .= $cat->title;
+            else
+                $html .= '<a href="'.$cat->getUrl().'">'.$cat->title.'</a>';
+
             if ($i<$nb)
                 $html .= $separator;
             $i++;
