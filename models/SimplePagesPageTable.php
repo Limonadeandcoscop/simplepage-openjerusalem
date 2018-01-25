@@ -201,6 +201,7 @@ class SimplePagesPageTable extends Omeka_Db_Table
         $alias = $this->getTableAlias();
         $paramName = 'category_id';
         $select->where($alias . '.' . $paramName . ' = ?', $category_id);
+        $select->order('order');
         return $this->fetchObjects($select);
     }
 }
