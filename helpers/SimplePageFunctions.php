@@ -212,7 +212,7 @@ function simple_pages_categories_display_breadcrumbs($categoryId = null, $separa
     }
 
     if ($category) {
-        $html .= $seperator;
+        $html .= $separator;
         $ancestorCategories = $category->getParents($category->id);
         $nb = count($ancestorCategories);
         $i = 1;
