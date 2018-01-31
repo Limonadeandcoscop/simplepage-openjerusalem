@@ -40,23 +40,19 @@ jQuery(window).load(function() {
 <?php echo $form; ?>
 <?php echo foot(); ?>
 
-<?php foreach($selectedKeywords as $tag) @$selectedKeywordsTxt .= "'".$tag."',"; ?>
-
 <?php
-
-            $seledctedTranslations  = '[';
-            foreach ($selectedKeywords as $translation)
-                $seledctedTranslations  .= '\''.$translation.'\',';
-            $seledctedTranslations  = rtrim($seledctedTranslations, ',');
-            echo $seledctedTranslations  .= ']';
-
+$keywords  = '[';
+foreach ($selectedKeywords as $translation)
+    $keywords  .= '\''.$translation.'\',';
+$keywords  = rtrim($keywords, ',');
+$keywords  .= ']';
 ?>
 
 <script src="https://semantic-ui.com/dist/semantic.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://semantic-ui.com/dist/semantic.min.css">
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    $('.ui.fluid.dropdown').dropdown('set selected', <?php echo @$seledctedTranslations ?>); //.dropdown({'allowAdditions': true, 'saveRemoteData': false});
+    $('.ui.fluid.dropdown').dropdown('set selected', <?php echo @$keywords ?>).dropdown({'allowAdditions': true, 'saveRemoteData': false});
 
 });
 </script>    
