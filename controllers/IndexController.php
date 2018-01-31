@@ -45,8 +45,19 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
     {
         // Get the requested page.
         $page = $this->_helper->db->findById();
+
+        $pageKeywords = $page->getKeywords();
+        $keywordsPageList = array();
+        if (count($pageKeywords)) {
+            foreach ($pageKeywords as $keyword) {
+                $keywordObj = get_record_by_id('SimplePagesKeyword', $keyword->keyword_id);
+                $keywordsPageList[] = strtolower($keywordObj->name);
+            }
+        }
+
         $form = $this->_getForm($page);
         $this->view->form = $form;
+        $this->view->selectedKeywords = $keywordsPageList;
         $this->_processPageForm($page, $form, 'edit');
     }
     
@@ -112,14 +123,13 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 $keywordsPageList[] = strtolower($keywordObj->name);
             }
         }
-                
+               
         $form->addElementToEditGroup('select', 'keywords', array(
             'label' => __('Keywords'),
             'class' => 'ui fluid search dropdown',
             'multiple' => 'multiple',
             'registerInArrayValidator' => false,
             'multiOptions' => $keywordsList,
-            'value' => $keywordsPageList
         ));       
 
         
