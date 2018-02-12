@@ -14,6 +14,9 @@ echo head($head);
     <li class="<?php if (isset($_GET['view']) && $_GET['view'] == 'categories') {echo 'current';} ?>">
         <a href="<?php echo html_escape(url('simple-pages/categories/index')); ?>"><?php echo __('Categories'); ?></a>
     </li>    
+    <li class="<?php if (isset($_GET['view']) && $_GET['view'] == 'keywords') {echo 'current';} ?>">
+        <a href="<?php echo html_escape(url('simple-pages/keywords/index')); ?>"><?php echo __('Tags'); ?></a>
+    </li>        
 </ul>
 <?php echo flash(); ?>
 

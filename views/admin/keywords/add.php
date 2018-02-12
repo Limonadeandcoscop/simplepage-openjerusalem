@@ -1,7 +1,7 @@
 <?php
 
 $head = array('bodyclass' => 'simple-pages primary', 
-              'title' => html_escape(__('Categories | Add category')));
+              'title' => html_escape(__('Tags | Add tag')));
 echo head($head);
 ?>
 

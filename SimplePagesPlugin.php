@@ -228,11 +228,13 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $indexResource = new Zend_Acl_Resource('SimplePages_Index');
         $pageResource = new Zend_Acl_Resource('SimplePages_Page');
         $categoryResource = new Zend_Acl_Resource('SimplePages_Category');
+        $tagResource = new Zend_Acl_Resource('SimplePages_Tag');
         $acl->add($indexResource);
         $acl->add($pageResource);
         $acl->add($categoryResource);
+        $acl->add($tagResource);
 
-        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category'));
+        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category', 'SimplePages_Tag'));
         $acl->allow(null, 'SimplePages_Page', 'show');
         $acl->allow(null, 'SimplePages_Category', 'show');
         $acl->deny(null, 'SimplePages_Page', 'show-unpublished');

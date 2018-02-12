@@ -11,7 +11,7 @@
  *
  * @package SimplePagesCategory
  */
-class SimplePagesKeyword extends Omeka_Record_AbstractRecord
+class SimplePagesKeyword extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Interface
 {
     public $name;
     public $inserted;
@@ -30,4 +30,31 @@ class SimplePagesKeyword extends Omeka_Record_AbstractRecord
         }
         return $res;
     }
+
+    protected function beforeDelete()
+    {
+        $params['keyword_id'] = $this->id;
+        $pages = get_db()->getTable('SimplePagesPageKeyword')->findBy($params);
+        if (count($pages)) {
+            foreach($pages as $page) {
+                $page->delete();
+            }
+        }
+    }
+
+
+    public function getRecordUrl($action = 'show')
+    {
+        if ('show' == $action) {
+            return public_url('tags/'.$this->name);
+        }
+        return array('module' => 'simple-pages', 'controller' => 'categories', 
+                     'action' => $action, 'id' => $this->id);
+    }    
+
+    public function getResourceId()
+    {
+        return 'SimplePages_Tag';
+    }
+
 }
