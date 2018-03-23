@@ -15,7 +15,7 @@
  * @param boolean Whether to return only published pages.
  * @return array The navigation links.
  */
-function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'order', $requiresIsPublished = false)
+function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'order', $requiresIsPublished = false, $onlyPagesWithNoCategories = false)
 {
     if ($parentId === null) {
         $parentPage = get_current_record('simple_pages_page', false);
@@ -27,6 +27,7 @@ function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'or
     }
 
     $findBy = array('parent_id' => $parentId, 'sort' => $sort);
+
     if ($requiresIsPublished) {
         $findBy['is_published'] = $requiresIsPublished ? 1 : 0;
     }
@@ -36,6 +37,9 @@ function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'or
     $navLinks = array();
 
     foreach ($pages as $page) {
+
+        if ($onlyPagesWithNoCategories && $page->category_id != 0) continue;
+
         $uri = public_url($page->slug);
 
         $subNavLinks = simple_pages_get_links_for_children_pages($page->id, $sort, $requiresIsPublished);
