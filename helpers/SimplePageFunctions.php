@@ -179,6 +179,8 @@ function simple_pages_get_parent_options($page)
 
 function simple_pages_categories_get_parent_options($category)
 {
+    $currentCategoryId = $category->id;
+
     $valuePairs = array('0' => __('Main Page (No Parent)'));
     $c = new SimplePagesCategory;
     $categories = $c->getCategories();
@@ -188,9 +190,9 @@ function simple_pages_categories_get_parent_options($category)
     foreach($categories as $category) {
         $t = '';
         for($i = 1 ; $i < $category->level ; $i++) $t .= '---';
-
         $title = $t.$category->title;
-        $results[$category->id] = $title;
+        if ($category->id != $currentCategoryId)
+            $results[$category->id] = $title;
     }
     return $results;
 }
