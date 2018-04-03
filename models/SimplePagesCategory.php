@@ -102,7 +102,8 @@ class SimplePagesCategory extends Omeka_Record_AbstractRecord implements Zend_Ac
         $categories = $this->getCategories($this->id);
         if (count($categories)) {
             foreach($categories as $category) {
-                $category->delete();
+                if ($category->id != $this->id)
+                    $category->delete();
             }
         }
     }
