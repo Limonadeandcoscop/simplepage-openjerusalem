@@ -31,7 +31,7 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
         //$this->view->children   = $category->getCategories($category->id, 1);
         $this->view->tree       = $category->getTree($category->id);
 
-        $this->view->pages = $category->getPages();
+        $this->view->pages = $category->getCategoryPages();
 
         $this->view->is_home_page = $isHomePage;
     }
