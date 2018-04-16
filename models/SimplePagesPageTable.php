@@ -204,4 +204,26 @@ class SimplePagesPageTable extends Omeka_Db_Table
         $select->order('order');
         return $this->fetchObjects($select);
     }
+
+    /**
+     * Return all pages of a category (and category children)
+     */
+    public function getCategoryPages($category_id)
+    {
+        $sql = "SELECT GROUP_CONCAT(lv SEPARATOR ',') as ids FROM (
+            SELECT @pv:=(SELECT GROUP_CONCAT(id SEPARATOR ',') FROM omeka_simple_pages_categories WHERE
+            FIND_IN_SET(parent_id, @pv)) AS lv FROM omeka_simple_pages_categories
+            JOIN (SELECT @pv:=" . $category_id . ")tmp
+            WHERE parent_id IN (@pv)) a;";
+        $results = get_db()->query($sql)->fetchAll();
+        $categories = array($category_id);
+        if ($results[0]["ids"] !== NULL) {
+            $categories = array_merge($categories,  explode(',', $results[0]["ids"]));
+        }
+
+        $select = parent::getSelect();
+        $select->where('category_id IN (?)', $categories);
+        $select->order('inserted DESC');
+        return $this->fetchObjects($select);
+    }
 }
