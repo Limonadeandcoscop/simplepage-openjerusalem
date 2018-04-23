@@ -35,7 +35,7 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
         // Set the created by user ID.
         $page->created_by_user_id = current_user()->id;
         $page->template = '';
-        $page->order = 0;
+        $page->order = 100;
         $form = $this->_getForm($page);
         $this->view->form = $form;
         $this->_processPageForm($page, $form, 'add');
