@@ -235,7 +235,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $acl->add($tagResource);
 
         $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category', 'SimplePages_Tag'));
-        $acl->allow(null, 'SimplePages_Page', 'show');
+        $acl->allow(null, 'SimplePages_Page', array('show', 'show-keyword'));
         $acl->allow(null, 'SimplePages_Category', 'show');
         $acl->deny(null, 'SimplePages_Page', 'show-unpublished');
     }
