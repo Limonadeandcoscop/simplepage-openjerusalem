@@ -12,10 +12,7 @@ echo head(array('title'=>$pageTitle,'bodyclass' => 'items browse'));
     </li>
     <li class="current">
         <a href="<?php echo html_escape(url('simple-pages/categories/index')); ?>"><?php echo __('Categories'); ?></a>
-    </li>    
-    <li class="">
-        <a href="<?php echo html_escape(url('simple-pages/keywords/index')); ?>"><?php echo __('Tags'); ?></a>
-    </li>        
+    </li>
 </ul>
 
 <?php echo flash(); ?>

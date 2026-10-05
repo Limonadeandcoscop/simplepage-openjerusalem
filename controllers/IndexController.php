@@ -46,18 +46,8 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
         // Get the requested page.
         $page = $this->_helper->db->findById();
 
-        $pageKeywords = $page->getKeywords();
-        $keywordsPageList = array();
-        if (count($pageKeywords)) {
-            foreach ($pageKeywords as $keyword) {
-                $keywordObj = get_record_by_id('SimplePagesKeyword', $keyword->keyword_id);
-                $keywordsPageList[] = strtolower($keywordObj->name);
-            }
-        }
-
         $form = $this->_getForm($page);
         $this->view->form = $form;
-        $this->view->selectedKeywords = $keywordsPageList;
         $this->_processPageForm($page, $form, 'edit');
     }
     
@@ -104,35 +94,8 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 'label' => __('Category'),
                 'description' => __('Page category')
             )
-        );   
+        );
 
-
-        $keywords = get_db()->getTable('SimplePagesKeyword')->findAll();
-        $keywordsList = array();
-        if (count($keywords)) {
-            foreach ($keywords as $keyword)  {
-                $keywordsList[strtolower($keyword->name)] = $keyword->name;
-            }
-        }
-
-        $pageKeywords = $page->getKeywords();
-        $keywordsPageList = array();
-        if (count($pageKeywords)) {
-            foreach ($pageKeywords as $keyword) {
-                $keywordObj = get_record_by_id('SimplePagesKeyword', $keyword->keyword_id);
-                $keywordsPageList[] = strtolower($keywordObj->name);
-            }
-        }
-               
-        $form->addElementToEditGroup('select', 'keywords', array(
-            'label' => __('Keywords'),
-            'class' => 'ui fluid search dropdown',
-            'multiple' => 'multiple',
-            'registerInArrayValidator' => false,
-            'multiOptions' => $keywordsList,
-        ));       
-
-        
         $form->addElementToEditGroup(
             'textarea', 'text',
             array('id' => 'simple-pages-text',
@@ -145,7 +108,6 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
                 )
             )
         );
-        
 
         $form->addElementToSaveGroup(
             'text', 'order',
@@ -159,7 +121,6 @@ class SimplePages_IndexController extends Omeka_Controller_AbstractActionControl
             )
         );
 
-       
         $form->addElementToSaveGroup(
             'checkbox', 'is_published',
             array(

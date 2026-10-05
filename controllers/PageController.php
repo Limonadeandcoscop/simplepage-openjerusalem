@@ -19,6 +19,25 @@ class SimplePages_PageController extends Omeka_Controller_AbstractActionControll
         $pageId = $this->_getParam('id');
         $page = $this->_helper->db->getTable('SimplePagesPage')->find($pageId);
         
+	if (get_html_lang() == 'en-US') {
+            $findBy['slug'] = trim($page->slug.'-en');
+            $pages = get_db()->getTable('SimplePagesPage')->findBy($findBy);
+            $enPage = $pages[0];
+            if (get_class($enPage) == 'SimplePagesPage') {
+                $page = $enPage;
+            }
+        } else {
+            if (substr($page->slug, strlen($page->slug)-3, strlen($page->slug)) == '-en') {
+                $findBy['slug'] = rtrim($page->slug, '-en');
+                $pages = get_db()->getTable('SimplePagesPage')->findBy($findBy);
+                if (isset($pages[0])) {
+                    $url = absolute_url($pages[0]->slug);
+                    $this->_helper->redirector->gotoUrl($url);
+                }
+            }
+        }
+       
+
         // Restrict access to the page when it is not published.
         if (!$page->is_published 
             && !$this->_helper->acl->isAllowed('show-unpublished')) {
@@ -28,23 +47,8 @@ class SimplePages_PageController extends Omeka_Controller_AbstractActionControll
         $route = $this->getFrontController()->getRouter()->getCurrentRouteName();
         $isHomePage = ($route == Omeka_Application_Resource_Router::HOMEPAGE_ROUTE_NAME);
 
-        $categoryObject = new SimplePagesCategory();
-        $this->view->tree = $categoryObject->getTree($page->category_id);
-
-        $this->view->tags = $page->getKeywordsObjects();
-
         // Set the page object to the view.
         $this->view->simple_pages_page = $page;
         $this->view->is_home_page = $isHomePage;
     }
-
-
-
-    public function showKeywordAction()
-    {
-        $keyword = get_record_by_id('SimplePagesKeyword', $this->_getParam('id'));
-        $this->view->keyword    = $keyword;
-        $this->view->pages      = $keyword->getPages();
-    }
-
 }
