@@ -13,9 +13,16 @@
  * @param integer|null The id of the parent page.  If null, it uses the current simple page
  * @param string The method by which you sort pages. Options are 'order' (default) and 'alpha'.
  * @param boolean Whether to return only published pages.
+ * @param array Array with keys of parent_id and values = array(SimplePages)
+ *              that have that parent_id. Used internally.
  * @return array The navigation links.
  */
-function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'order', $requiresIsPublished = false, $onlyPagesWithNoCategories = false)
+function simple_pages_get_links_for_children_pages(
+    $parentId = null,
+    $sort = 'order',
+    $requiresIsPublished = false,
+    $pages = null,
+    $onlyPagesWithNoCategories = false)
 {
     if ($parentId === null) {
         $parentPage = get_current_record('simple_pages_page', false);
@@ -26,36 +33,47 @@ function simple_pages_get_links_for_children_pages($parentId = null, $sort = 'or
         }
     }
 
-    $findBy = array('parent_id' => $parentId, 'sort' => $sort);
+    if (! isset($pages)) {
+        $findBy = array('sort' => $sort);
+        if ($requiresIsPublished) {
+            $findBy['is_published'] = $requiresIsPublished ? 1 : 0;
+        }
+        $pages = get_db()->getTable('SimplePagesPage')->findBy($findBy);
 
-    if ($requiresIsPublished) {
-        $findBy['is_published'] = $requiresIsPublished ? 1 : 0;
+        $parentIdToPages = array();
+        foreach ($pages as $page) {
+            if (! isset($parentIdToPages[$page->parent_id])) {
+                $parentIdToPages[$page->parent_id] = array();
+            }
+            $parentIdToPages[$page->parent_id][] = $page;
+        }
+        $pages = $parentIdToPages;
     }
-
-    $pages = get_db()->getTable('SimplePagesPage')->findBy($findBy);
 
     $navLinks = array();
 
-    foreach ($pages as $page) {
-
-        if ($onlyPagesWithNoCategories && $page->category_id != 0) continue;
-
-        $uri = public_url($page->slug);
-
-        $subNavLinks = simple_pages_get_links_for_children_pages($page->id, $sort, $requiresIsPublished);
-        if (count($subNavLinks) > 0) {
-            $navLinks[] = array(
-                'label' => $page->title,
-                'uri' => $uri,
-                'pages' => $subNavLinks
+    if (isset($pages[$parentId]) && is_array($pages[$parentId])) {
+        foreach ($pages[$parentId] as $page) {
+            $uri = public_url($page->slug);
+            $subNavLinks = simple_pages_get_links_for_children_pages(
+                $page->id, $sort, $requiresIsPublished, $pages
             );
-        } else {
-            $navLinks[] = array(
-                'label' => $page->title,
-                'uri' => $uri,
-            );
+
+            if (count($subNavLinks) > 0) {
+                $navLinks[] = array(
+                    'label' => $page->title,
+                    'uri' => $uri,
+                    'pages' => $subNavLinks
+                );
+            } else {
+                $navLinks[] = array(
+                    'label' => $page->title,
+                    'uri' => $uri,
+                );
+            }
         }
     }
+
     return $navLinks;
 }
 
@@ -123,9 +141,11 @@ function simple_pages_display_breadcrumbs($pageId = null, $seperator=' > ', $inc
             }
         }
         $pageLinks[] = '<a href="'. public_url('') . '">' . __('Home') . '</a>';
+        
+        $seperator = '<span class="separator" aria-hidden="true">' . html_escape($seperator) . '</span>';
 
         // create the bread crumb
-        $html .= implode(html_escape($seperator), array_reverse($pageLinks));
+        $html .= implode($seperator, array_reverse($pageLinks));
     }
     return $html;
 }
@@ -199,42 +219,45 @@ function simple_pages_categories_get_parent_options($category)
     return $results;
 }
 
-
-
 /**
- * Returns a breadcrumb for a given page.
- *
- * @uses public_url(), html_escape()
- * @param integer|null The id of the page.  If null, it uses the current simple page.
- * @param string $separator The string used to separate each section of the breadcrumb.
- * @param boolean $withItems Specify if the breadcrumb contains item
- */
-function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $withItems = false)
+ *  * Returns a breadcrumb for a given page.
+ *   *
+ *    * @uses public_url(), html_escape()
+ *     * @param integer|null The id of the page.  If null, it uses the current simple page.
+ *      * @param string $separator The string used to separate each section of the breadcrumb.
+ *       * @param boolean $withItems Specify if the breadcrumb contains item
+ *        */
+function simple_pages_categories_display_breadcrumbs($categoryId = null, $separator=' > ', $withItems = false, $page = null)
 {
-    $html = link_to_home_page(__('Home'));
+	    $html  = '<ol class="breadcrumb" style="border:1px solid red">';
+	        $html .= '<li class="breadcrumb-item">'.link_to_home_page(__('Home')).'</li>';
 
-    if ($categoryId === null) {
-        $category = get_current_record('simple_pages_category', false);
-    } else {
-        $category = get_db()->getTable('SimplePagesCategory')->find($categoryId);
-    }
+	        if ($categoryId === null) {
+			        $category = get_current_record('simple_pages_category', false);
+				    } else {
+					            $category = get_db()->getTable('SimplePagesCategory')->find($categoryId);
+						        }
 
-    if ($category) {
-        $html .= $separator;
-        $ancestorCategories = $category->getParents($category->id);
-        $nb = count($ancestorCategories);
-        $i = 1;
-        foreach ($ancestorCategories as $cat) {
-            if($i == $nb && !$withItems)
-                $html .= $cat->title;
-            else
-                $html .= '<a href="'.$cat->getUrl().'">'.$cat->title.'</a>';
+		    if ($category) {
+			            $ancestorCategories = $category->getParents($category->id);
+				            $nb = count($ancestorCategories);
+				            $i = 1;
+					            foreach ($ancestorCategories as $cat) {
+							                if(!isset($page) || ($i == $nb && !$withItems))
+										                $html .= '<li class="breadcrumb-item active" aria-current="page">'.$cat->title.'</li>';
+									            else
+											                    $html .= '<li class="breadcrumb-item"><a href="'.$cat->getUrl().'">'.$cat->title.'</a></li>';
 
-            if ($i<$nb)
-                $html .= $separator;
-            $i++;
-        }
-    }
+									            $i++;
+									        }
+					        }
 
-    return $html;
+		    if (isset($page)) {
+			            $html .= '<li class="breadcrumb-item active" aria-current="page">'.metadata('simple_pages_page', 'title').'</li>'; 
+				        }
+
+		    $html .= '</ol>';
+
+		    return $html;
 }
+

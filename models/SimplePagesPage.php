@@ -115,55 +115,6 @@ class SimplePagesPage extends Omeka_Record_AbstractRecord implements Zend_Acl_Re
         $this->modified_by_user_id = current_user()->id;
     }
 
-
-    private function _addKeywords($pageKeywords) 
-    {
-        $keywords = get_db()->getTable('SimplePagesKeyword')->findAll();
-        $allKeywords = array();
-        foreach ($keywords as $keyword)  {
-            $allKeywords[$keyword->id] = strtolower($keyword->name);
-        }        
-
-        $keywords = $this->getKeywords();
-        foreach($keywords as $keyword) {
-            $keyword->delete();
-        }
-
-        foreach ($pageKeywords as $keyword) {
-            if (in_array(strtolower($keyword), $allKeywords)) {
-                $key = array_search(strtolower($keyword), $allKeywords);
-                $k = new SimplePagesPageKeyword;
-                $k->page_id = $this->id;
-                $k->keyword_id = $key;
-                $k->save();                
-            } else {
-                throw new Exception("Invalid keyword");
-            }
-        }
-
-    }
-    
-
-    public function getKeywords()
-    {
-        if (!$this->id) return array();
-        return get_db()->getTable('SimplePagesPageKeyword')->findBy(array('page_id' => $this->id));
-    }
-
-
-    public function getKeywordsObjects()
-    {
-        if (!$this->id) return array();
-        $keywords = get_db()->getTable('SimplePagesPageKeyword')->findBy(array('page_id' => $this->id));
-        $res = array();
-        foreach($keywords as $keyword) {
-            $res[] = get_record_by_id('SimplePagesKeyword', $keyword->keyword_id);
-        }
-        return $res;
-
-    }
-
-
     protected function afterSave($args)
     {
         if (!$this->is_published) {
@@ -172,12 +123,6 @@ class SimplePagesPage extends Omeka_Record_AbstractRecord implements Zend_Acl_Re
         $this->setSearchTextTitle($this->title);
         $this->addSearchText($this->title);
         $this->addSearchText($this->text);
-
-        // Save keywords
-        $tableKeywords = $this->getTable('SimplePagesKeyword');
-        $pageKeywords = $tableKeywords->addKeywords($this->keywords);
-
-        $this->_addKeywords($pageKeywords);
     }
     
     /**

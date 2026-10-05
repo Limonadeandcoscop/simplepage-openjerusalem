@@ -21,8 +21,8 @@ jQuery(window).load(function() {
         ],
         relative_urls: false,
         filemanager_title:"Responsive Filemanager",
-        external_filemanager_path:"/openjerusalem/omeka/application/views/scripts/javascripts/vendor/filemanager/",
-        external_plugins: { "filemanager" : "/openjerusalem/omeka/application/views/scripts/javascripts/vendor/filemanager/plugin.min.js"},
+        external_filemanager_path:"/application/views/scripts/javascripts/vendor/filemanager/",
+        external_plugins: { "filemanager" : "/application/views/scripts/javascripts/vendor/filemanager/plugin.min.js"},
         toolbar1: "undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
         toolbar2: "fullscreen | styleselect responsivefilemanager file image link unlink anchor preview code"            
     });

@@ -223,7 +223,7 @@ class SimplePagesPageTable extends Omeka_Db_Table
 
         $select = parent::getSelect();
         $select->where('category_id IN (?)', $categories);
-        $select->order('order ASC');
+        $select->order('inserted DESC');
         return $this->fetchObjects($select);
     }
 }

@@ -31,7 +31,18 @@ class SimplePages_CategoriesController extends Omeka_Controller_AbstractActionCo
         //$this->view->children   = $category->getCategories($category->id, 1);
         $this->view->tree       = $category->getTree($category->id);
 
-        $this->view->pages = $category->getCategoryPages();
+        $pages = $category->getCategoryPages();
+
+        $lang = get_html_lang();
+        foreach($pages as $key => $page) {
+            if ($lang == 'fr' && substr($page->slug, -3) == '-en') {
+                unset($pages[$key]);
+            } elseif ($lang == 'en-US' && substr($page->slug, -3) != '-en') {
+                unset($pages[$key]);
+            }
+        }
+
+        $this->view->pages = $pages;
 
         $this->view->is_home_page = $isHomePage;
     }

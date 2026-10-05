@@ -17,8 +17,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
      * @var array Hooks for the plugin.
      */
     protected $_hooks = array('install', 'uninstall', 'upgrade', 'initialize',
-        'define_acl', 'define_routes', 'config_form', 'config',
-        'html_purifier_form_submission');
+        'define_acl', 'define_routes', 'html_purifier_form_submission');
 
     /**
      * @var array Filters for the plugin.
@@ -26,14 +25,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = array('admin_navigation_main',
         'public_navigation_main', 'search_record_types', 'page_caching_whitelist',
         'page_caching_blacklist_for_record',
-	'api_resources', 'api_import_omeka_adapters');
-
-    /**
-     * @var array Options and their default values.
-     */
-    protected $_options = array(
-        'simple_pages_filter_page_content' => '0'
-    );
+        'api_resources', 'api_import_omeka_adapters');
 
     /**
      * Install the plugin.
@@ -88,27 +80,6 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         $db->query($sql);
 
-
-        $sql = "
-        CREATE TABLE IF NOT EXISTS `$db->SimplePagesKeyword` (
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-          `name` tinytext COLLATE utf8_unicode_ci NOT NULL,
-          `inserted` timestamp NOT NULL DEFAULT  CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-        $db->query($sql);        
-
-
-        $sql = "
-        CREATE TABLE IF NOT EXISTS `$db->SimplePagesPageKeyword` (
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-          `page_id`  int(10) unsigned NOT NULL,
-          `keyword_id`  int(10) unsigned NOT NULL,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-        $db->query($sql);        
-
-
         // Save an example page.
         $page = new SimplePagesPage;
         $page->modified_by_user_id = current_user()->id;
@@ -119,8 +90,6 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $page->slug = 'about';
         $page->text = '<p>This is an example page. Feel free to replace this content, or delete the page and start from scratch.</p>';
         $page->save();
-
-        $this->_installOptions();
     }
 
     /**
@@ -133,11 +102,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $sql = "DROP TABLE IF EXISTS `$db->SimplePagesPage`";
         $db->query($sql);
         $sql = "DROP TABLE IF EXISTS `$db->SimplePagesCategory`";
-        $db->query($sql);        
-        $sql = "DROP TABLE IF EXISTS `$db->SimplePagesKeyword`";
-        $db->query($sql);                
-        $sql = "DROP TABLE IF EXISTS `$db->SimplePagesPageKeyword`";
-        $db->query($sql);          
+        $db->query($sql);              
         
         $this->_uninstallOptions();
     }
@@ -206,6 +171,10 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         if ($oldVersion < '3.0.2') {
             $db->query("ALTER TABLE `$db->SimplePagesPage` MODIFY `text` MEDIUMTEXT COLLATE utf8_unicode_ci");
         }
+
+        if ($oldVersion < '3.1.1') {
+            delete_option('simple_pages_filter_page_content');
+        }
     }
 
     /**
@@ -228,14 +197,12 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
         $indexResource = new Zend_Acl_Resource('SimplePages_Index');
         $pageResource = new Zend_Acl_Resource('SimplePages_Page');
         $categoryResource = new Zend_Acl_Resource('SimplePages_Category');
-        $tagResource = new Zend_Acl_Resource('SimplePages_Tag');
         $acl->add($indexResource);
         $acl->add($pageResource);
         $acl->add($categoryResource);
-        $acl->add($tagResource);
 
-        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category', 'SimplePages_Tag'));
-        $acl->allow(null, 'SimplePages_Page', array('show', 'show-keyword'));
+        $acl->allow(array('super', 'admin'), array('SimplePages_Index', 'SimplePages_Page', 'SimplePages_Category'));
+        $acl->allow(null, 'SimplePages_Page', 'show');
         $acl->allow(null, 'SimplePages_Category', 'show');
         $acl->deny(null, 'SimplePages_Page', 'show-unpublished');
     }
@@ -287,45 +254,10 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
                 )
             );
         }
-
-        // Add custom routes based on the tag name.
-        $keywords = get_db()->getTable('SimplePagesKeyword')->findAll();
-        foreach ($keywords as $keyword) {
-            $router->addRoute(
-                'simple_pages_show_keyword_' . $keyword->id, 
-                new Zend_Controller_Router_Route(
-                    'tags/' . $keyword->name, 
-                    array(
-                        'module'       => 'simple-pages', 
-                        'controller'   => 'page', 
-                        'action'       => 'show-keyword', 
-                        'id'           => $keyword->id
-                    )
-                )
-            );
-        }        
     }
 
     /**
-     * Display the plugin config form.
-     */
-    public function hookConfigForm()
-    {
-        require dirname(__FILE__) . '/config_form.php';
-    }
-
-    /**
-     * Set the options from the config form input.
-     */
-    public function hookConfig()
-    {
-        set_option('simple_pages_filter_page_content', (int)(boolean)$_POST['simple_pages_filter_page_content']);
-    }
-
-    /**
-     * Filter the 'text' field of the simple-pages form, but only if the 
-     * 'simple_pages_filter_page_content' setting has been enabled from within the
-     * configuration form.
+     * Filter the 'text' field of the simple-pages form
      * 
      * @param array $args Hook args, contains:
      *  'request': Zend_Controller_Request_Http
@@ -338,11 +270,6 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
 
         // If we aren't editing or adding a page in SimplePages, don't do anything.
         if ($request->getModuleName() != 'simple-pages' or !in_array($request->getActionName(), array('edit', 'add'))) {
-            return;
-        }
-        
-        // Do not filter HTML for the request unless this configuration directive is on.
-        if (!get_option('simple_pages_filter_page_content')) {
             return;
         }
         
@@ -376,7 +303,7 @@ class SimplePagesPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function filterPublicNavigationMain($nav)
     {
-        $navLinks = simple_pages_get_links_for_children_pages(0, 'order', true, 'onlyPagesWithNoCategories');
+        $navLinks = simple_pages_get_links_for_children_pages(0, 'order', true, null, 'onlyPagesWithNoCategories');
         $nav = array_merge($nav, $navLinks);
         return $nav;
     }
